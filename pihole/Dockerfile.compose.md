@@ -1,0 +1,21 @@
+## Usage
+
+```
+docker-compose up -d
+```
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `TZ` | Timezone | `Europe/London` |
+| `WEBPASSWORD` | Password for the web interface | `password` |
+| `DNS1` | Primary DNS server | `1.1.1.1` |
+| `DNS2` | Secondary DNS server | `1.0.0.1` |
+| `DNSMASQ_LISTENING` | Listen on all interfaces | `all` |
+| `DNSMASQ_NO_NEG_CACHE` | Disable negative caching | `false` |
+| `DNSMASQ_ADD_LOCAL_HOSTS` | Add local hosts | `false` |
+| `DNSMASQ_ADD_LOCAL_DOMAINS` | Add local domains | `false` |
+| `DNSMASQ_ADD_LOCAL_DOMAINS_FILE` | Add local domains from file | `false
