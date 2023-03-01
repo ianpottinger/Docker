@@ -1,0 +1,109 @@
+version: '3.7'
+
+services:
+  duckdns:
+    container_name: duckdns
+    image: linuxserver/duckdns
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - SUBDOMAINS=your-domain
+      - TOKEN=your-duckdns-token
+    # Mount the config directory to preserve the DuckDNS settings
+    volumes:
+      - ./duckdns:/config
+
+  letsencrypt:
+    container_name: letsencrypt
+    image: linuxserver/letsencrypt
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - URL=your-domain.duckdns.org
+      - SUBDOMAINS=www, 
+      - VALIDATION=duckdns
+      - DUCKDNSTOKEN=your-duckdns-token
+      - EMAIL=your-email
+      - DHLEVEL=2048
+    # Mount the config directory to preserve the Let's Encrypt settings
+    volumes:
+      - ./letsencrypt:/config
+    # Expose ports for HTTP and HTTPS
+    ports:
+      - 80:80
+      - 443:443
+    # Map the Lets Encrypt container to the network for NGINX to access
+    networks:
+      - app-network
+
+  db:
+    container_name: db
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: addressbook
+      MYSQL_USER: root
+      MYSQL_PASSWORD: your-mysql-password
+      MYSQL_ROOT_PASSWORD: your-mysql-password
+    # Mount the data directory to preserve the database
+    volumes:
+      - ./data:/var/lib/mysql
+    networks:
+      - app-network
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    restart: always
+    # Map the Lets Encrypt container to the network for NGINX to access
+    networks:
+      - app-network
+    # Mount the website directory to serve the website files
+    volumes:
+      - ./website:/usr/share/nginx/html
+      # Mount the NGINX config file
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # Mount the Let's Encrypt certificate and key files
+      - ./letsencrypt:/etc/letsencrypt
+    # Expose ports for HTTP and HTTPS
+    ports:
+      - 80:80
+      - 443:443
+
+networks:
+  app-network:
+    driver: bridge
+
+
+
+
+Make sure to replace the following values:
+
+your-domain: the domain name that you own and want to use for your web address book
+your-duckdns-token: the token you obtained from DuckDNS
+your-email: your email address that you want to use for Let's Encrypt registration
+your-mysql-password: the password you want to use for your MySQL database
+You will also need to create the following directories:
+
+duckdns: to store the DuckDNS configuration files
+letsencrypt: to store the Let's Encrypt certificate and key files
+data: to store the MySQL database files
+website: to store the website files
+And create the following files:
+
+nginx.conf: the NGINX configuration file that specifies how to route the HTTP and HTTPS traffic to the web address book. Here's an example:
+
+markdown
+Copy code
+events {}
+
+http {
+    server {
+        listen 80;
+
+
+
